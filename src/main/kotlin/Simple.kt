@@ -3,6 +3,7 @@ import org.w3c.dom.*
 import kotlinx.html.*
 import kotlinx.html.dom.*
 import kotlinx.html.js.*
+import org.w3c.dom.css.CSS
 
 data class Stats(val low: Int, val avg: Int, val high: Int, val color: String)
 
@@ -85,7 +86,8 @@ fun drawTable(tableDiv: HTMLDivElement, data: dynamic)
 }
 */
 
-fun main(args: Array<String>) {
+fun main() {
+
     // JS Standard-Dokument
     document.bgColor = "FFFFFF"
     val email = document.getElementById("email") as HTMLInputElement
@@ -95,32 +97,87 @@ fun main(args: Array<String>) {
     // Der Teil funktioniert, wenn man im Java-Script-Teil die D3-Bibliothek als Skript einbindet.
     // js("d3.select('.target').style('stroke-width', 8)")
     console.log("Nach dem JS-Befehl")
+
+    d3.select("body")
+        .style("background-color", "white")
+
     val x: Selection = d3.select(".target")
     x.style("stroke-width", 20)
-    x.style("color", "red")
+    x.style("color", "red") // color: rgb(0,0,255);
+    x.style("opacity", 0.2)
     console.log(x)
-    /*
-    js("""
-    var sampleData ={};	/* Sample random data. */
-	["HI", "AK", "FL", "SC", "GA", "AL", "NC", "TN", "RI", "CT", "MA",
-	"ME", "NH", "VT", "NY", "NJ", "PA", "DE", "MD", "WV", "KY", "OH",
-	"MI", "WY", "MT", "ID", "WA", "DC", "TX", "CA", "AZ", "NV", "UT",
-	"CO", "NM", "OR", "ND", "SD", "NE", "IA", "MS", "IN", "IL", "MN",
-	"WI", "MO", "AR", "OK", "KS", "LS", "VA"]
-		.forEach(function(d){
-			var low=Math.round(100*Math.random()),
-				mid=Math.round(100*Math.random()),
-				high=Math.round(100*Math.random());
-			sampleData[d]={low:d3.min([low,mid,high]), high:d3.max([low,mid,high]),
-					avg:Math.round((low+mid+high)/3), color:d3.interpolate("#0295D5", "#F88909")(low/100)};
-		});
-    """)
 
-    drawTable(document.getElementById("table") as HTMLDivElement, js("sampleData"))
+    val svg1 = d3.select("#dataviz_area")
+    svg1.append("circle")
+        .attr("cx", 2).attr("cy", 2).attr("r", 40).style("fill", "blue")
+    svg1.append("circle")
+        .attr("cx", 140).attr("cy", 70).attr("r", 80).style("fill", "red")
+    svg1.append("circle")
+        .attr("cx", 140).attr("cy", 70).attr("r", 20).style("fill", "green")
 
-    js("uStates.draw(\"#statesvg\", sampleData, _.tooltipHtmlJs);")
+    // scale übersetzt einen numerischen Wert in eine Pixel-Position.
 
-    val d3_kt: dynamic = js("d3.select(self.frameElement)")
-    d3_kt.style("height", "600px")
-     */
+    val svgVizArea = d3.select("#viz_area")
+
+// Create a scale: transform value in pixel
+    val scaledX = d3.scaleLinear()
+        .domain(arrayOf(0, 100))      //  .domain([0, 100])         // This is the min and the max of the data: 0 to 100 if percentages
+        .range(arrayOf(20, 420))       // This is the corresponding value I want in Pixel
+
+    val scaledY = d3.scaleLinear()
+        .domain(arrayOf(0, 100))       // Prozent, siehe Oben
+        .range(arrayOf(0, 250))      // Pixelwert, siehe Oben
+
+    svgVizArea.call(d3.axisBottom(scaledX))
+
+// Add 3 dots for 0, 50 and 100%
+    svgVizArea.append("circle")
+        .attr("cx", scaledX(10)).attr("cy", scaledY(30)).attr("r", 20).style("fill", "yellow")
+    svgVizArea.append("circle")
+        .attr("cx", scaledX(50)).attr("cy", scaledY(50)).attr("r", 20).style("fill", "black")
+    svgVizArea.append("circle")
+        .attr("cx", scaledX(100)).attr("cy", scaledY(100)).attr("r", 20).style("fill", "orange")
+
+    createNewGraph()
+
 }
+
+fun createNewGraph() {
+    val gArea = GraphArea(xSize = 450, ySize = 400, top=10, right=40, bottom=30, left=30)
+
+    val koordinatenSystem = d3.select("#graphArea")
+        .append("svg")
+        .attr("width", gArea.xSize)
+        .attr("height", gArea.ySize)
+        // translate this svg element to leave some margin.
+        .append("g")
+        .attr("transform", "translate(${gArea.left},  ${gArea.top})")
+
+
+    // X scale and Axis
+    val scaledX = d3.scaleLinear()
+        .domain(arrayOf(0, 100))         // This is the min and the max of the data: 0 to 100 if percentages
+        .range(arrayOf(0, gArea.width))       // This is the corresponding value I want in Pixel
+
+    koordinatenSystem
+        .append("g")
+        .attr("transform", "translate(0, ${gArea.height} )")
+        .call(d3.axisBottom(scaledX))
+
+    // Y scale and Axis
+    val scaledY = d3.scaleLinear()
+        .domain(arrayOf(0, 100))                // This is the min and the max of the data: 0 to 100 if percentages
+        .range(arrayOf(gArea.height, 0))       // This is the corresponding value I want in Pixel
+
+    koordinatenSystem
+        .append("g")
+        .call(d3.axisLeft(scaledY))
+}
+
+data class GraphArea(val xSize: Int, val ySize: Int, val top: Int, val right: Int, val bottom: Int,  val left: Int) {
+    val width = xSize - left - right
+    val height = ySize - top - bottom
+}
+
+
+

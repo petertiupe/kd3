@@ -5,6 +5,7 @@
     <title>JS Client</title>
 </head>
 <body>
+<label>email</label>
 <input type="text" name="email" id="email"/>
 
 <div id="table"></div>
@@ -20,7 +21,18 @@
 <svg>
     <circle class="target" style="fill: #69b3a2" stroke="black" cx=50 cy=50 r=40></circle>
 </svg>
-<script src="https://d3js.org/d3.v4.js"></script>
+<div>
+<svg id="dataviz_area" height="200" width="450"></svg>
+</div>
+
+<!-- Add a svg area, empty -->
+<div>
+    <svg id="viz_area" height="400" width="800"></svg>
+</div>
+
+<!-- Hier wird ein Koordinatensystem erzeugt... -->
+<div id="graphArea"></div>
+<!--script src="https://d3js.org/d3.v4.js"></script-->
 <script src="kd3.js"></script>
 </body>
 </html>
