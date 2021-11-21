@@ -138,14 +138,15 @@ fun main() {
     svgVizArea.append("circle")
         .attr("cx", scaledX(100)).attr("cy", scaledY(100)).attr("r", 20).style("fill", "orange")
 
-    createNewGraph()
+    createNewGraph("#graphArea")
+    databindingExample()
 
 }
 
-fun createNewGraph() {
+fun createNewGraph(htmlID: String, data: Array<GraphPoint> = emptyArray()) {
     val gArea = GraphArea(xSize = 450, ySize = 400, top=10, right=40, bottom=30, left=30)
 
-    val koordinatenSystem = d3.select("#graphArea")
+    val koordinatenSystem = d3.select(htmlID)
         .append("svg")
         .attr("width", gArea.xSize)
         .attr("height", gArea.ySize)
@@ -172,12 +173,34 @@ fun createNewGraph() {
     koordinatenSystem
         .append("g")
         .call(d3.axisLeft(scaledY))
+
+    // Add data-points
+    // Add 3 dots for 0, 50 and 100%
+    koordinatenSystem
+        .selectAll("whatever")
+        .data(data)
+        .enter()
+        .append("circle")
+        .style("fill", "red")
+        .attr("cx", {gp: GraphPoint -> scaledX(gp.x)})
+        .attr("cy", {gp: GraphPoint -> scaledY(gp.y)})
+        .attr("r", 7)
+
 }
+
+fun databindingExample() {
+    val data = arrayOf(GraphPoint(10, 20), GraphPoint(40, 90), GraphPoint(80, 50))
+    createNewGraph("#scatterArea", data)
+}
+
+
 
 data class GraphArea(val xSize: Int, val ySize: Int, val top: Int, val right: Int, val bottom: Int,  val left: Int) {
     val width = xSize - left - right
     val height = ySize - top - bottom
 }
+
+data class GraphPoint(val x: Int, val y: Int)
 
 
 

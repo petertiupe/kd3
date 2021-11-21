@@ -13,6 +13,9 @@ external class Selection() {
      fun append(name: String) : Selection
      fun attr(name: String, value: dynamic = definedExternally): Selection
      fun call(fkt: dynamic): Selection
+     fun selectAll(id: String): Selection
+     fun data(dt: dynamic): Selection
+     fun enter(): Selection
 
 
 }
